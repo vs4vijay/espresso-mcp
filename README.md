@@ -37,7 +37,7 @@ The following resources are available:
 - uv install
 
 ```bash
-# Run Dev Mode
+# Dev Mode
 uv run mcp dev server.py
 ```
 
