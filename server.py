@@ -312,3 +312,14 @@ def get_greeting(name: str) -> str:
 def get_config() -> str:
     """Static configuration data"""
     return "App configuration here"
+
+
+def main():
+    # Start the MCP server
+    print("Starting Espresso MCP server...")
+
+    mcp.run()
+
+
+if __name__ == "__main__":
+    main()

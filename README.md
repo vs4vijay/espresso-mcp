@@ -68,10 +68,15 @@ The following resources are available:
 - uv: `pip install uv`
 
 ```bash
-# Install
-uv install
+# Install dependencies
+uv sync
+# OR
+uv sync --frozen --all-extras --dev
 
-# Run Dev Mode
+# Run Server
+uv run espresso-mcp
+
+# Run in Dev Mode
 uv run mcp dev server.py
 ```
 
@@ -87,10 +92,12 @@ yarn global add @modelcontextprotocol/inspector
 yarn run @modelcontextprotocol/inspector python server.py
 ```
 
-## Testing
+## Testing and Linting
 
 ```bash
 uv run pytest
+
+uv run ruff check
 ```
 
 ## Publishing
@@ -114,5 +121,8 @@ uv init espresso-mcp
 uv add "mcp[cli]"
 
 uv run mcp dev server.py
+
+
+uv tool run espresso-mcp
 
 ```
