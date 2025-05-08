@@ -176,7 +176,7 @@ def take_screenshot(output_path: str) -> str:
 def record_screen(output_path: str, duration: int) -> str:
     """Record the screen of the connected Android device for a specified duration"""
     timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-    file = f"/sdcard/espress-mcp_recording_{timestamp}.mp4"
+    file = f"/sdcard/espresso-mcp_recording_{timestamp}.mp4"
     result = subprocess.run(
         ["adb", "shell", "screenrecord", file],
         capture_output=True,

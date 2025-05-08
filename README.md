@@ -2,6 +2,34 @@
 
 A MCP Server for the Espresso Android Test Framework, designed to enhance testing capabilities and streamline development workflows.
 
+<a href="https://glama.ai/mcp/servers/@vs4vijay/espresso-mcp">
+  <img width="380" height="200" src="https://glama.ai/mcp/servers/@vs4vijay/espresso-mcp/badge" />
+</a>
+
+## Installation
+
+- Python 3.x
+- uv: `pip install uv`
+
+```bash
+uv tool install espresso-mcp
+```
+
+## Usage
+
+- On Claude: Add below JSON config to the file `claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "terminal": {
+      "command": "uv",
+      "args": ["pip", "run", "espresso-mcp", "--timeout-ms", "30000"]
+    }
+  }
+}
+```
+
 ## Available Tools
 
 The following tools are available in the `espresso-mcp` project:
@@ -32,13 +60,47 @@ The following resources are available:
 - **config://app**: Retrieve static configuration data.
 - **greeting://{name}**: Get a personalized greeting.
 
-## Local Development
+---
 
-- uv install
+## Local Setup
+
+- Python 3.x
+- uv: `pip install uv`
 
 ```bash
+# Install
+uv install
+
 # Run Dev Mode
 uv run mcp dev server.py
+```
+
+## Debugging
+
+- Use MCP Inspector
+
+```bash
+# Install MCP Inspector
+yarn global add @modelcontextprotocol/inspector
+
+# Test MCP Server
+yarn run @modelcontextprotocol/inspector python server.py
+```
+
+## Testing
+
+```bash
+uv run pytest
+```
+
+## Publishing
+
+```bash
+# Build the package
+uv build
+
+# Upload to PyPI
+uv publish
 ```
 
 ---
@@ -47,7 +109,7 @@ uv run mcp dev server.py
 
 ```bash
 
-uv init espress-mcp
+uv init espresso-mcp
 
 uv add "mcp[cli]"
 
