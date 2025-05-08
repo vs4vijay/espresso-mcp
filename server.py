@@ -1,5 +1,6 @@
 # server.py
 import subprocess
+from datetime import datetime
 from enum import Enum
 
 import httpx
@@ -61,6 +62,19 @@ def dump_ui_hierarchy() -> str:
     if result.returncode != 0:
         raise RuntimeError(f"Error dumping UI hierarchy: {result.stderr}")
     return result.stdout.strip()
+
+
+@mcp.tool()
+def open_uri(uri: str) -> str:
+    """Open a URI on the connected Android device"""
+    result = subprocess.run(
+        ["adb", "shell", "am", "start", "-a", "android.intent.action.VIEW", "-d", uri],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        raise RuntimeError(f"Error opening URI '{uri}': {result.stderr}")
+    return f"URI '{uri}' has been opened successfully."
 
 
 @mcp.tool()
@@ -159,16 +173,27 @@ def take_screenshot(output_path: str) -> str:
 
 
 @mcp.tool()
-def screenshot(output_path: str) -> str:
-    """Take a screenshot of the connected Android device and save it to the specified path"""
+def record_screen(output_path: str, duration: int) -> str:
+    """Record the screen of the connected Android device for a specified duration"""
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    file = f"/sdcard/espress-mcp_recording_{timestamp}.mp4"
     result = subprocess.run(
-        ["adb", "exec-out", "screencap", "-p"], capture_output=True, text=False
+        ["adb", "shell", "screenrecord", file],
+        capture_output=True,
+        text=True,
+        timeout=duration,
     )
     if result.returncode != 0:
-        raise RuntimeError(f"Error taking screenshot: {result.stderr.decode('utf-8')}")
-    with open(output_path, "wb") as file:
-        file.write(result.stdout)
-    return f"Screenshot saved to '{output_path}'."
+        raise RuntimeError(f"Error recording screen: {result.stderr}")
+
+    pull_result = subprocess.run(
+        ["adb", "pull", file, output_path],
+        capture_output=True,
+        text=True,
+    )
+    if pull_result.returncode != 0:
+        raise RuntimeError(f"Error pulling recorded file: {pull_result.stderr}")
+    return f"Screen recording saved to '{output_path}'."
 
 
 class Button(Enum):
@@ -193,6 +218,19 @@ def press_button(button: Button) -> str:
     if result.returncode != 0:
         raise RuntimeError(f"Error pressing button '{button.name}': {result.stderr}")
     return f"Button '{button.name}' has been pressed."
+
+
+@mcp.tool()
+def type_text(text: str) -> str:
+    """Type text on the connected Android device"""
+    result = subprocess.run(
+        ["adb", "shell", "input", "text", text],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        raise RuntimeError(f"Error typing text '{text}': {result.stderr}")
+    return f"Text '{text}' has been typed successfully."
 
 
 @mcp.tool()
@@ -241,19 +279,6 @@ def swipe(direction: str, duration: int = 500) -> str:
     if result.returncode != 0:
         raise RuntimeError(f"Error performing swipe: {result.stderr}")
     return f"Swipe gesture performed in '{direction}' direction over {duration}ms."
-
-
-@mcp.tool()
-def open_uri(uri: str) -> str:
-    """Open a URI on the connected Android device"""
-    result = subprocess.run(
-        ["adb", "shell", "am", "start", "-a", "android.intent.action.VIEW", "-d", uri],
-        capture_output=True,
-        text=True,
-    )
-    if result.returncode != 0:
-        raise RuntimeError(f"Error opening URI '{uri}': {result.stderr}")
-    return f"URI '{uri}' has been opened successfully."
 
 
 # Add an addition tool
