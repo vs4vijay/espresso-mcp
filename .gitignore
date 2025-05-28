@@ -144,3 +144,5 @@ __pycache__/
 *.so
 *.pyc
 *.pyo
+
+window-dump.xml

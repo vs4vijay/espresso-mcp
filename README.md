@@ -13,9 +13,30 @@ A MCP Server for the Espresso Android Test Framework, designed to enhance testin
 
 ```bash
 uv tool install espresso-mcp
+
+# OR
+
+uvx espresso-mcp
 ```
 
 ## Usage
+
+- On Github Copilot: Add below JSON config to the file `mcp.json`
+
+```json
+{
+    "servers": {
+        "espresso-mcp": {
+            "command": "uvx",
+            "args": [
+                "espresso-mcp"
+            ],
+            
+            "env": {}
+        }
+    }
+}
+```
 
 - On Claude: Add below JSON config to the file `claude_desktop_config.json`
 
@@ -23,8 +44,8 @@ uv tool install espresso-mcp
 {
   "mcpServers": {
     "terminal": {
-      "command": "uv",
-      "args": ["pip", "run", "espresso-mcp", "--timeout-ms", "30000"]
+      "command": "uvx",
+      "args": ["espresso-mcp", "--timeout-ms", "30000"]
     }
   }
 }

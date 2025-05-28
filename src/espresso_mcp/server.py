@@ -1,10 +1,23 @@
-# server.py
+import logging
 import subprocess
 from datetime import datetime
 from enum import Enum
 
 import httpx
 from mcp.server.fastmcp import FastMCP
+from PIL import Image as PILImage
+
+# Set up logging
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
+# Setup Console logger
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.INFO)
+console_handler.setFormatter(
+    logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+)
+logger.addHandler(console_handler)
 
 # Create an MCP server
 mcp = FastMCP("Espresso-MCP")
@@ -61,7 +74,20 @@ def dump_ui_hierarchy() -> str:
     )
     if result.returncode != 0:
         raise RuntimeError(f"Error dumping UI hierarchy: {result.stderr}")
-    return result.stdout.strip()
+
+    # The UI hierarchy is dumped to a file on the device /sdcard/window_dump.xml
+    # Pull the file to the local machine and read its contents
+    pull_result = subprocess.run(
+        ["adb", "pull", "/sdcard/window_dump.xml", "window_dump.xml"],
+        capture_output=True,
+        text=True,
+    )
+    if pull_result.returncode != 0:
+        raise RuntimeError(f"Error pulling UI hierarchy file: {pull_result.stderr}")
+
+    with open("window_dump.xml", encoding="utf-8") as f:
+        ui_hierarchy = f.read()
+    return ui_hierarchy
 
 
 @mcp.tool()
@@ -162,13 +188,25 @@ def clear_app_data(package_name: str) -> str:
 @mcp.tool()
 def take_screenshot(output_path: str) -> str:
     """Take a screenshot of the connected Android device"""
-    result = subprocess.run(
-        ["adb", "exec-out", "screencap", "-p"], capture_output=True, text=True
-    )
-    if result.returncode != 0:
-        raise RuntimeError(f"Error taking screenshot: {result.stderr}")
-    with open(output_path, "wb") as file:
-        file.write(result.stdout.encode("latin1"))
+
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    file = f"/sdcard/espresso-mcp_screenshot_{timestamp}.mp4"
+
+    # Capture screenshot on the device
+    subprocess.run(["adb", "shell", "screencap", "-p", file], check=True)
+    # Pull the screenshot to the local machine
+    subprocess.run(["adb", "pull", file, "screenshot.png"], check=True)
+    # Remove the screenshot from the device
+    subprocess.run(["adb", "shell", "rm", file], check=True)
+
+    # Compress the screenshot to reduce size
+    with PILImage.open("screenshot.png") as img:
+        width, height = img.size
+        new_width = int(width * 0.3)
+        new_height = int(height * 0.3)
+        resized_img = img.resize((new_width, new_height), PILImage.Resampling.LANCZOS)
+        resized_img.save(output_path, "PNG", quality=85, optimize=True)
+
     return f"Screenshot saved to '{output_path}'."
 
 
@@ -281,13 +319,6 @@ def swipe(direction: str, duration: int = 500) -> str:
     return f"Swipe gesture performed in '{direction}' direction over {duration}ms."
 
 
-# Add an addition tool
-@mcp.tool()
-def add(a: int, b: int) -> int:
-    """Add two numbers"""
-    return a + b
-
-
 @mcp.tool()
 async def fetch_weather(city: str) -> str:
     """Fetch current weather for a city"""
@@ -318,7 +349,19 @@ def main():
     # Start the MCP server
     print("Starting Espresso MCP server...")
 
-    mcp.run()
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Run MCP Server")
+    parser.add_argument("--host", default="0.0.0.0", help="Host to bind to")
+    parser.add_argument("--port", type=int, default=3333, help="Port to listen on")
+    args = parser.parse_args()
+
+    transport = "stdio"  # Default transport
+    if args.port:
+        transport = "sse"
+
+    # mcp.run()
+    mcp.run(transport=transport)
 
 
 if __name__ == "__main__":
