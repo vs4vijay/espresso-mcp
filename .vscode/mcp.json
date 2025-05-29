@@ -7,8 +7,8 @@
 
       "env": {}
     },
-    "viz-espresso-mcp": {
-      "url": "http://0.0.0.0:8000/sse"
-    }
+    // "viz-espresso-mcp": {
+    //   "url": "http://0.0.0.0:8000/sse"
+    // }
   }
 }

@@ -352,12 +352,13 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(description="Run MCP Server")
+    parser.add_argument("--sse", action="store_true", help="Use SSE transport")
     parser.add_argument("--host", default="0.0.0.0", help="Host to bind to")
     parser.add_argument("--port", type=int, default=3333, help="Port to listen on")
     args = parser.parse_args()
 
     transport = "stdio"  # Default transport
-    if args.port:
+    if args.sse:
         transport = "sse"
 
     # mcp.run()

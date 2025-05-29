@@ -126,6 +126,8 @@ uv run ruff check
 ```bash
 # Build the package
 uv build
+uv build --wheel
+uv build --no-sources
 
 # Upload to PyPI
 uv publish
