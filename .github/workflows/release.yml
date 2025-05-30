@@ -42,13 +42,15 @@ jobs:
   release:
     needs: build
     runs-on: ubuntu-latest
-    environment: release
+    environment: publish_to_pypi
     # if: github.event_name == 'release'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Install uv
+        run: pip install uv
       - name: Download dist artifacts
         uses: actions/download-artifact@v4
         with:
