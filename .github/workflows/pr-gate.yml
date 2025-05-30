@@ -8,7 +8,8 @@ on:
       - main
 
 jobs:
-  lint-test:
+  pr-gate:
+    name: PR Gate
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

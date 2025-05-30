@@ -12,11 +12,11 @@ An MCP Server for the Espresso Android Test Framework, crafted to improve testin
 - uv: `pip install uv`
 
 ```bash
-uv tool install espresso-mcp
-
-# OR
-
+# Run in stdio mode
 uvx espresso-mcp
+
+# Run in sse mode
+uvx espresso-mcp --sse
 ```
 
 ## Usage
@@ -25,16 +25,13 @@ uvx espresso-mcp
 
 ```json
 {
-    "servers": {
-        "espresso-mcp": {
-            "command": "uvx",
-            "args": [
-                "espresso-mcp"
-            ],
-            
-            "env": {}
-        }
+  "servers": {
+    "espresso-mcp": {
+      "command": "uvx",
+      "args": ["espresso-mcp"],
+      "env": {}
     }
+  }
 }
 ```
 
@@ -98,7 +95,7 @@ uv sync --frozen --all-extras --dev
 uv run espresso-mcp
 
 # Run in Dev Mode
-uv run mcp dev server.py
+uv run mcp dev src/espresso_mcp/server.py
 ```
 
 ## Debugging
@@ -113,12 +110,14 @@ yarn global add @modelcontextprotocol/inspector
 yarn run @modelcontextprotocol/inspector python server.py
 ```
 
-## Testing and Linting
+## Linting and Testing
 
 ```bash
-uv run pytest
-
+# Lint
 uv run ruff check
+
+# Tests
+uv run pytest
 ```
 
 ## Publishing
@@ -138,6 +137,13 @@ uv publish
 ### Developement Notes
 
 ```bash
+
+uv tool install espresso-mcp
+
+# OR
+
+uvx espresso-mcp
+
 
 uv init espresso-mcp
 
