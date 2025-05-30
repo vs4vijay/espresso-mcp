@@ -1,6 +1,6 @@
 [project]
 name = "espresso-mcp"
-version = "0.1.4"
+version = "0.1.5"
 description = "An MCP Server for the Espresso Android Test Framework"
 readme = "README.md"
 requires-python = ">=3.10"
