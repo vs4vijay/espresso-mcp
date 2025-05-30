@@ -1,6 +1,6 @@
 # espresso-mcp
 
-A MCP Server for the Espresso Android Test Framework, designed to enhance testing capabilities and streamline development workflows.
+An MCP Server for the Espresso Android Test Framework, crafted to improve testing capabilities and optimize development workflows.
 
 <a href="https://glama.ai/mcp/servers/@vs4vijay/espresso-mcp">
   <img width="380" height="200" src="https://glama.ai/mcp/servers/@vs4vijay/espresso-mcp/badge" />
@@ -21,7 +21,7 @@ uvx espresso-mcp
 
 ## Usage
 
-- On Github Copilot: Add below JSON config to the file `mcp.json`
+- On Github Copilot: Add below JSON config to the file `.vscode/mcp.json`
 
 ```json
 {
