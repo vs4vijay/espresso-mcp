@@ -154,4 +154,9 @@ uv run mcp dev server.py
 
 uv tool run espresso-mcp
 
+
+uv run pre-commit install
+
+pre-commit run --all-files
+
 ```

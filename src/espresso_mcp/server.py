@@ -14,9 +14,7 @@ logger.setLevel(logging.INFO)
 # Setup Console logger
 console_handler = logging.StreamHandler()
 console_handler.setLevel(logging.INFO)
-console_handler.setFormatter(
-    logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
-)
+console_handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
 logger.addHandler(console_handler)
 
 # Create an MCP server
@@ -69,9 +67,7 @@ def kill_emulator(emulator_name: str) -> str:
 @mcp.tool()
 def dump_ui_hierarchy() -> str:
     """Dump the UI hierarchy of the connected Android device"""
-    result = subprocess.run(
-        ["adb", "shell", "uiautomator", "dump"], capture_output=True, text=True
-    )
+    result = subprocess.run(["adb", "shell", "uiautomator", "dump"], capture_output=True, text=True)
     if result.returncode != 0:
         raise RuntimeError(f"Error dumping UI hierarchy: {result.stderr}")
 
@@ -153,9 +149,7 @@ def stop_app(package_name: str) -> str:
 @mcp.tool()
 def install_app(app_path: str) -> str:
     """Install an App APK on the connected Android device"""
-    result = subprocess.run(
-        ["adb", "install", app_path], capture_output=True, text=True
-    )
+    result = subprocess.run(["adb", "install", app_path], capture_output=True, text=True)
     if result.returncode != 0:
         raise RuntimeError(f"Error installing App: {result.stderr}")
     return f"App '{app_path}' has been installed successfully."
@@ -164,9 +158,7 @@ def install_app(app_path: str) -> str:
 @mcp.tool()
 def uninstall_app(package_name: str) -> str:
     """Uninstall an app from the connected Android device"""
-    result = subprocess.run(
-        ["adb", "uninstall", package_name], capture_output=True, text=True
-    )
+    result = subprocess.run(["adb", "uninstall", package_name], capture_output=True, text=True)
     if result.returncode != 0:
         raise RuntimeError(f"Error uninstalling app '{package_name}': {result.stderr}")
     return f"App '{package_name}' has been uninstalled successfully."
@@ -179,9 +171,7 @@ def clear_app_data(package_name: str) -> str:
         ["adb", "shell", "pm", "clear", package_name], capture_output=True, text=True
     )
     if result.returncode != 0:
-        raise RuntimeError(
-            f"Error clearing app data for '{package_name}': {result.stderr}"
-        )
+        raise RuntimeError(f"Error clearing app data for '{package_name}': {result.stderr}")
     return f"App data for '{package_name}' has been cleared."
 
 
@@ -260,15 +250,68 @@ def press_button(button: Button) -> str:
 
 @mcp.tool()
 def type_text(text: str) -> str:
-    """Type text on the connected Android device"""
+    """Type text on the connected Android device. Handles spaces correctly."""
+    # Replace spaces with %s for adb input
+    adb_text = text.replace(" ", "%s")
     result = subprocess.run(
-        ["adb", "shell", "input", "text", text],
+        ["adb", "shell", "input", "text", adb_text],
         capture_output=True,
         text=True,
     )
     if result.returncode != 0:
         raise RuntimeError(f"Error typing text '{text}': {result.stderr}")
     return f"Text '{text}' has been typed successfully."
+
+
+@mcp.tool()
+def clear_and_type_text(text: str) -> str:
+    """Clear all text and type new text on the connected Android device"""
+    # Clear existing text by selecting all and deleting
+    move_home = subprocess.run(
+        ["adb", "shell", "input", "keyevent", "KEYCODE_MOVE_HOME"],
+        capture_output=True,
+        text=True,
+    )
+    if move_home.returncode != 0:
+        raise RuntimeError(f"Error moving cursor to start: {move_home.stderr}")
+
+    # Try to select all (long-press SHIFT + move to end)
+    shift_down = subprocess.run(
+        ["adb", "shell", "input", "keyevent", "KEYCODE_SHIFT_LEFT"],
+        capture_output=True,
+        text=True,
+    )
+    if shift_down.returncode != 0:
+        raise RuntimeError(f"Error pressing SHIFT: {shift_down.stderr}")
+
+    move_end = subprocess.run(
+        ["adb", "shell", "input", "keyevent", "KEYCODE_MOVE_END"],
+        capture_output=True,
+        text=True,
+    )
+    if move_end.returncode != 0:
+        raise RuntimeError(f"Error moving cursor to end: {move_end.stderr}")
+
+    # Delete selected text
+    delete = subprocess.run(
+        ["adb", "shell", "input", "keyevent", "KEYCODE_DEL"],
+        capture_output=True,
+        text=True,
+    )
+    if delete.returncode != 0:
+        raise RuntimeError(f"Error clearing text: {delete.stderr}")
+
+    # Type new text
+    adb_text = text.replace(" ", "%s")
+    type_result = subprocess.run(
+        ["adb", "shell", "input", "text", adb_text],
+        capture_output=True,
+        text=True,
+    )
+    if type_result.returncode != 0:
+        raise RuntimeError(f"Error typing text '{text}': {type_result.stderr}")
+
+    return f"Cleared existing text and typed '{text}' successfully."
 
 
 @mcp.tool()
