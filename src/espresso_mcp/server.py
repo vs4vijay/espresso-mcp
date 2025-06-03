@@ -271,6 +271,45 @@ def type_text(text: str) -> str:
     return f"Text '{text}' has been typed successfully."
 
 
+def clear_and_type_text(text: str) -> str:
+    """Clear all text and type new text on the connected Android device"""
+    # Clear existing text by selecting all and deleting
+    clear_result = subprocess.run(
+        ["adb", "shell", "input", "keyevent", "KEYCODE_MOVE_HOME"],
+        capture_output=True,
+        text=True,
+    )
+    if clear_result.returncode != 0:
+        raise RuntimeError(f"Error moving cursor to start: {clear_result.stderr}")
+
+    clear_result = subprocess.run(
+        ["adb", "shell", "input", "keyevent", "KEYCODE_SHIFT_LEFT"],
+        capture_output=True,
+        text=True,
+    )
+    if clear_result.returncode != 0:
+        raise RuntimeError(f"Error selecting all text: {clear_result.stderr}")
+
+    clear_result = subprocess.run(
+        ["adb", "shell", "input", "keyevent", "KEYCODE_DEL"],
+        capture_output=True,
+        text=True,
+    )
+    if clear_result.returncode != 0:
+        raise RuntimeError(f"Error clearing text: {clear_result.stderr}")
+
+    # Type new text
+    type_result = subprocess.run(
+        ["adb", "shell", "input", "text", text],
+        capture_output=True,
+        text=True,
+    )
+    if type_result.returncode != 0:
+        raise RuntimeError(f"Error typing text '{text}': {type_result.stderr}")
+
+    return f"Text '{text}' has been typed successfully."
+
+
 @mcp.tool()
 def tap(x: int, y: int) -> str:
     """Simulate a tap on the connected Android device at the specified coordinates"""
