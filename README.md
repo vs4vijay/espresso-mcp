@@ -68,8 +68,11 @@ The following tools are available in the `espresso-mcp` project:
 - **record_screen**: Record the screen of the connected Android device for a specified duration.
 - **press_button**: Simulate a button press on the connected Android device.
 - **type_text**: Type text on the connected Android device.
+- **clear_and_type_text**: Clear all text and type new text on the connected Android device.
+- **replace_text**: Replace text by clearing current text and typing new text on the connected Android device.
 - **tap**: Simulate a tap on the connected Android device at specific coordinates.
 - **swipe**: Perform a swipe gesture in a specific direction on the connected Android device.
+- **dump_current_activity**: Dump the current activity name of the connected Android device.
 
 ## Resources
 

@@ -363,6 +363,117 @@ def swipe(direction: str, duration: int = 500) -> str:
 
 
 @mcp.tool()
+def dump_current_activity() -> str:
+    """Dump the current activity name of the connected Android device"""
+    result = subprocess.run(
+        ["adb", "shell", "dumpsys", "activity", "activities"],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        raise RuntimeError(f"Error dumping current activity: {result.stderr}")
+    
+    # Parse the output to find the current activity
+    output = result.stdout
+    lines = output.splitlines()
+    
+    # Look for the "mResumedActivity" line which contains the current activity
+    for line in lines:
+        if "mResumedActivity" in line:
+            # Extract activity name from the line
+            # Format: mResumedActivity: ActivityRecord{...component=package.name/.ActivityName...}
+            if "component=" in line:
+                component_part = line.split("component=")[1]
+                activity_name = component_part.split(" ")[0].split("}")[0]
+                return f"Current activity: {activity_name}"
+    
+    # Alternative: look for "Running activities" section and get the top one
+    in_running_activities = False
+    for line in lines:
+        if "Running activities" in line:
+            in_running_activities = True
+            continue
+        if in_running_activities and "ActivityRecord" in line and "state=RESUMED" in line:
+            # Extract activity name from ActivityRecord line
+            if " " in line and "/" in line:
+                parts = line.strip().split()
+                for part in parts:
+                    if "/" in part and "." in part:
+                        activity_name = part
+                        return f"Current activity: {activity_name}"
+    
+    return "Current activity information not found in dumpsys output"
+
+
+@mcp.tool()
+def replace_text(text: str) -> str:
+    """Replace text on the connected Android device by clearing current text and typing new text"""
+    # Try using Ctrl+A to select all text
+    ctrl_a = subprocess.run(
+        ["adb", "shell", "input", "keyevent", "KEYCODE_CTRL_LEFT", "KEYCODE_A"],
+        capture_output=True,
+        text=True,
+    )
+    
+    # If Ctrl+A doesn't work, try alternative selection methods
+    if ctrl_a.returncode != 0:
+        # Method 1: Select all using key combination
+        select_all_combo = subprocess.run(
+            ["adb", "shell", "input", "keyevent", "29", "29", "29"],  # Multiple Ctrl+A attempts
+            capture_output=True,
+            text=True,
+        )
+        
+        if select_all_combo.returncode != 0:
+            # Method 2: Move to start, then select to end
+            move_home = subprocess.run(
+                ["adb", "shell", "input", "keyevent", "KEYCODE_MOVE_HOME"],
+                capture_output=True,
+                text=True,
+            )
+            if move_home.returncode == 0:
+                # Hold shift and move to end
+                subprocess.run(
+                    ["adb", "shell", "input", "keyevent", "KEYCODE_SHIFT_LEFT"],
+                    capture_output=True,
+                    text=True,
+                )
+                subprocess.run(
+                    ["adb", "shell", "input", "keyevent", "KEYCODE_MOVE_END"],
+                    capture_output=True,
+                    text=True,
+                )
+    
+    # Clear the selected text by pressing delete/backspace
+    delete = subprocess.run(
+        ["adb", "shell", "input", "keyevent", "KEYCODE_DEL"],
+        capture_output=True,
+        text=True,
+    )
+    if delete.returncode != 0:
+        # If delete doesn't work, try backspace
+        backspace = subprocess.run(
+            ["adb", "shell", "input", "keyevent", "KEYCODE_BACK"],
+            capture_output=True,
+            text=True,
+        )
+        if backspace.returncode != 0:
+            raise RuntimeError("Error clearing text: unable to delete selected text")
+    
+    # Type the new text
+    adb_text = text.replace(" ", "%s")
+    type_result = subprocess.run(
+        ["adb", "shell", "input", "text", adb_text],
+        capture_output=True,
+        text=True,
+    )
+    if type_result.returncode != 0:
+        raise RuntimeError(f"Error typing text '{text}': {type_result.stderr}")
+    
+    return f"Replaced text with '{text}' successfully."
+
+
+@mcp.tool()
 async def fetch_weather(city: str) -> str:
     """Fetch current weather for a city"""
     async with httpx.AsyncClient() as client:
