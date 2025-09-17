@@ -28,3 +28,17 @@ def test_list_emulators_exists():
 
     assert hasattr(server, "list_emulators")
     assert callable(server.list_emulators)
+
+
+def test_dump_current_activity_exists():
+    from espresso_mcp import server
+
+    assert hasattr(server, "dump_current_activity")
+    assert callable(server.dump_current_activity)
+
+
+def test_replace_text_exists():
+    from espresso_mcp import server
+
+    assert hasattr(server, "replace_text")
+    assert callable(server.replace_text)
