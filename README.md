@@ -48,6 +48,29 @@ uvx espresso-mcp --sse
 }
 ```
 
+- Using OpenAI SDK
+
+```python
+from openai import OpenAI
+
+client = OpenAI()
+
+resp = client.responses.create(
+    model="gpt-4.1",
+    tools=[
+        {
+            "type": "mcp",
+            "server_label": "espresso-mcp",
+            "server_url": "http://localhost:8000/sse",
+            "require_approval": "never",
+        },
+    ],
+    input="Open Teams App",
+)
+
+print(resp.output_text)
+```
+
 ## Available Tools
 
 The following tools are available in the `espresso-mcp` project:
