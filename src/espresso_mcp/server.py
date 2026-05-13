@@ -328,6 +328,29 @@ def tap(x: int, y: int) -> str:
 
 
 @mcp.tool()
+def long_press(x: int, y: int, duration: int = 1000) -> str:
+    """Simulate a long press on the connected Android device at the specified coordinates"""
+    result = subprocess.run(
+        [
+            "adb",
+            "shell", 
+            "input",
+            "swipe",
+            str(x),
+            str(y),
+            str(x),
+            str(y),
+            str(duration),
+        ],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        raise RuntimeError(f"Error performing long press at ({x}, {y}): {result.stderr}")
+    return f"Long press performed at coordinates ({x}, {y}) for {duration}ms."
+
+
+@mcp.tool()
 def swipe(direction: str, duration: int = 500) -> str:
     """Perform a swipe gesture in a specific direction on the connected Android device"""
     directions = {

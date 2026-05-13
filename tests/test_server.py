@@ -42,3 +42,10 @@ def test_replace_text_exists():
 
     assert hasattr(server, "replace_text")
     assert callable(server.replace_text)
+
+
+def test_long_press_exists():
+    from espresso_mcp import server
+
+    assert hasattr(server, "long_press")
+    assert callable(server.long_press)
